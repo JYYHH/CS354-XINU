@@ -3,9 +3,11 @@
 #include <xinu.h>
 
 struct	lifdata	Lif_data;
+	// this is the memory cache version, for the first block in device (the directory block)
 
 /*------------------------------------------------------------------------
  * lifsinit  -  Initialize the local file system master device
+ * called only when rebooting the file system
  *------------------------------------------------------------------------
  */
 devcall	lifsinit (

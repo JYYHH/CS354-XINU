@@ -3,6 +3,7 @@
 #include <xinu.h>
 
 struct	liflcblk	lifltab[Nlifl];		/* Pseudo-device control blocks	*/
+// can have at most 6 "struct	liflcblk"
 
 /*------------------------------------------------------------------------
  * liflinit  -  Initialize control blocks for local file pseudo-devices

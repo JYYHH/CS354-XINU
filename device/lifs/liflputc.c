@@ -32,6 +32,7 @@ devcall	liflputc (
 
 	ldptr = lifptr->lifdirptr;
 	if (lifptr->lifpos > ldptr->ld_size) {
+		// check for the branch "if (lifptr->lifpos >= ldptr->ld_size) {", this one is for the inconsistent insert
 		signal(lifptr->lifmutex);
 		return SYSERR;
 	}

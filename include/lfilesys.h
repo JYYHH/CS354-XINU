@@ -73,7 +73,7 @@ struct	lfiblk		{		/* Format of index block	*/
 	uint32		ib_offset;	/* First data byte of the file	*/
 					/*  Indexed by this i-block	*/
 	dbid32		ib_dba[LF_IBLEN];/* Ptrs to data blocks indexed	*/
-};
+}; // size: 18 * 4 = 72 Bytes
 
 /* File System ID */
 
@@ -98,6 +98,7 @@ struct	ldentry	{			/* Description of entry for one	*/
 	uint32	ld_size;		/* Curr. size of file in bytes	*/
 	ibid32	ld_ilist;		/* ID of first i-block for file	*/
 					/*   or IB_NULL for empty file	*/
+		// (JHY): in this lab, we have only one i-block for each file..
 	char	ld_name[LF_NAME_LEN];	/* Null-terminated file name	*/
 };
 

@@ -35,7 +35,8 @@
 					/*   bytes 0 through 8191).	*/
 #define	LIF_DMASK	0x000001ff	/* Mask for the data in a data	*/
 					/*   block (0 through 511)	*/
-
+#define LIF_INDMASK 0x0000007f  /* Mask for the indirect block	*/
+					/*   block (0 through 127)	*/
 #define	LIF_AREA_IB	1		/* First sector of i-blocks	*/
 #define	LIF_AREA_DIR	0		/* First sector of directory	*/
 
@@ -51,7 +52,7 @@ struct	lifiblk		{		/* Format of index block	*/
 	dbid32		ind;
 	dbid32		ind2;
 	dbid32		ind3;
-};
+}; // size: 18 * 4 = 72 Bytes, and one disk block can contain at most 7 lifiblk, this is why "#define	ib2sect(ib)	(((ib)/7)+LF_AREA_IB)"
 
 /* Structure of a data block when on the free list on disk */
 
@@ -73,6 +74,7 @@ struct	lifdir	{			/* Entire directory on disk	*/
 	ibid32	lifd_ifree;		/* List of free i-blocks on disk*/
 	int32	lifd_nfiles;		/* Current number of files	*/
 	struct	ldentry lifd_files[LIF_NUM_DIR_ENT]; /* Set of files	*/
+		// each contains the size of each file
 	uint32	lifd_revid;		/* fsysid in reverse byte order	*/
 };
 #pragma pack()
@@ -81,6 +83,7 @@ struct	lifdir	{			/* Entire directory on disk	*/
 
 struct	lifdata	{			/* Local file system data	*/
 	did32	lif_dskdev;		/* Device ID of disk to use	*/
+		// in this lab, we only use RAM0 as the value of "lif_dskdev"
 	sid32	lif_mutex;		/* Mutex for the directory and	*/
 					/*   index/data free lists	*/
 	struct	lifdir	lif_dir;		/* In-memory copy of directory	*/
@@ -104,10 +107,12 @@ struct	liflcblk	{			/* Local file control block	*/
 	char	lifname[LIF_NAME_LEN];	/* Name of the file		*/
 	ibid32	lifinum;			/* ID of current index block in	*/
 					/*   lifiblock or LIF_INULL	*/
+					// ********** It's NOT the real block id on disk, need some transformation, see "lifibput.c"
 	struct	lifiblk	lifiblock;	/* In-mem copy of current index	*/
 					/*   block			*/
 	dbid32	lifdnum;			/* Number of current data block	*/
 					/*   in lifdblock or LIF_DNULL	*/
+					// ********** It's the real block id on disk
 	char	lifdblock[LIF_BLKSIZ];	/* In-mem copy of current data	*/
 					/*   block			*/
 	char	*lifbyte;		/* Ptr to byte in lifdblock or	*/
@@ -116,8 +121,8 @@ struct	liflcblk	{			/* Local file control block	*/
 					/*   outside lifdblock		*/
 
 	// the indirect block number and content
-	dbid32	lifindnum;
-	dbid32	lifindblock[LIF_NUM_ENT_PER_BLK];
+	dbid32	lifindnum; // similar to lifdnum, it's the block id on RAM-disk
+	dbid32	lifindblock[LIF_NUM_ENT_PER_BLK]; // the content here will not be flushed, but we use "lifindnum" as a indicator
 
 	// the doubly indirect block number and content
 	dbid32	lif2indnum;

@@ -4,6 +4,7 @@
 
 #define CONTENT "Hello World"
 #define LEN 11
+#define ADDITION 512 * 3 + 11
 
 process main() {
 	// print some constants
@@ -11,8 +12,9 @@ process main() {
 	kprintf("LIF_AREA_INDIR: %d\n", LIF_AREA_INDIR);
 	kprintf("LIF_AREA_2INDIR: %d\n", LIF_AREA_2INDIR);
 	kprintf("LIF_AREA_3INDIR: %d\n", LIF_AREA_3INDIR);
+		// These 4 are some constant for the size
 
-	lifscreate(RAM0, 128, 102400); // initialize the ramdisk
+	lifscreate(RAM0, 128, 2000000); // initialize the ramdisk
 
 	did32 fd;
 	int status;
@@ -23,34 +25,36 @@ process main() {
 	fd = open(LIFILESYS, "index.txt", "rw");
 	kprintf("fd: %d\n", fd);
 
-	// test write
-	status = write(fd, CONTENT, LEN);
-	kprintf("status for write: %d\n", status);
-
-	// test seek
-	status = seek(fd, 5);
-	kprintf("status for seek: %d\n", status);
-
 	// test putc
-	status = putc(fd, 'X');
+	for (i = 0; i < 888888; i++){
+		status = putc(fd, 'A' + (i % 25));
+	}
 	kprintf("status for putc: %d\n", status);
 
 	status = close(fd);
 	kprintf("status for close: %d\n", status);
 
+	// Open Another file
+	fd = open(LIFILESYS, "666.txt", "rw");
+	for (i = 0; i < 888888; i++)
+		putc(fd, 'Z');
+	close(fd);
+
 	// re-open the file for read
 	fd = open(LIFILESYS, "index.txt", "r");
 	kprintf("fd: %d\n", fd);
 
-	char buf[LEN + 1];
-	memset(buf, NULLCH, LEN + 1);
-
-	// test read
-	status = read(fd, buf, LEN);
-	buf[LEN] = '\0';
-	kprintf("Content of the file:");
-	for (i = 0; i < LEN; ++i) {
-		kprintf("%c", buf[i]);
+	int pos;
+	for (i = 0; i < 100000; i++){
+		pos = rand() % 888888;
+		seek(fd, pos);
+		if (getc(fd) != 'A' + (pos % 25)){
+			kprintf("Error at position %d, quit!\n", pos);
+			exit();
+		}
 	}
-	kprintf("\n");
+	
+
+	kprintf("******* PASS ALL TEST CASES! ************\n");
+
 }
